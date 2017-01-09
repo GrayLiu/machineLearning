@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Oct 27, 2010
 Logistic Regression Working Module
@@ -17,12 +19,13 @@ def loadDataSet():
 def sigmoid(inX):
     return 1.0/(1+exp(-inX))
 
+#梯度上升算法
 def gradAscent(dataMatIn, classLabels):
     dataMatrix = mat(dataMatIn)             #convert to NumPy matrix
     labelMat = mat(classLabels).transpose() #convert to NumPy matrix
     m,n = shape(dataMatrix)
-    alpha = 0.001
-    maxCycles = 500
+    alpha = 0.001 #目标移动的步长
+    maxCycles = 500 #迭代次数
     weights = ones((n,1))
     for k in range(maxCycles):              #heavy on matrix operations
         h = sigmoid(dataMatrix*weights)     #matrix mult
@@ -46,12 +49,13 @@ def plotBestFit(weights):
     ax = fig.add_subplot(111)
     ax.scatter(xcord1, ycord1, s=30, c='red', marker='s')
     ax.scatter(xcord2, ycord2, s=30, c='green')
-    x = arange(-3.0, 3.0, 0.1)
+    x = arange(-3.0, 3.0, 0.1)             #这个值是怎么定义的？
     y = (-weights[0]-weights[1]*x)/weights[2]
     ax.plot(x, y)
     plt.xlabel('X1'); plt.ylabel('X2');
     plt.show()
 
+#随机梯度上升算法
 def stocGradAscent0(dataMatrix, classLabels):
     m,n = shape(dataMatrix)
     alpha = 0.01
@@ -110,4 +114,14 @@ def multiTest():
     for k in range(numTests):
         errorSum += colicTest()
     print "after %d iterations the average error rate is: %f" % (numTests, errorSum/float(numTests))
-        
+
+
+if __name__ == "__main__":
+    dataArr, labelMat = loadDataSet()
+    #weights = gradAscent(dataArr, labelMat)
+    #plotBestFit(weights.getA())  # getA()这个方法可以将自身返回成一个n维数组对象
+    #weights = stocGradAscent0(array(dataArr), labelMat)
+    #plotBestFit(weights)
+    #weights = stocGradAscent1(array(dataArr), labelMat,50)
+    #plotBestFit(weights)
+    multiTest()
