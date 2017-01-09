@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Oct 19, 2010
 
@@ -5,6 +7,7 @@ Created on Oct 19, 2010
 '''
 from numpy import *
 
+#构建词向量
 def loadDataSet():
     postingList=[['my', 'dog', 'has', 'flea', 'problems', 'help', 'please'],
                  ['maybe', 'not', 'take', 'him', 'to', 'dog', 'park', 'stupid'],
@@ -14,13 +17,15 @@ def loadDataSet():
                  ['quit', 'buying', 'worthless', 'dog', 'food', 'stupid']]
     classVec = [0,1,0,1,0,1]    #1 is abusive, 0 not
     return postingList,classVec
-                 
+
+#创建文档中出现的不重复的词条列表
 def createVocabList(dataSet):
-    vocabSet = set([])  #create empty set
+    vocabSet = set([])  #create empty set set和其他语言类似, 是一个无序不重复元素集, 基本功能包括关系测试和消除重复元素
     for document in dataSet:
-        vocabSet = vocabSet | set(document) #union of the two sets
+        vocabSet = vocabSet | set(document) #union of the two sets 不存在的词条 则加入列表
     return list(vocabSet)
 
+#标记词汇表中的单词在输入文档中是否出现
 def setOfWords2Vec(vocabList, inputSet):
     returnVec = [0]*len(vocabList)
     for word in inputSet:
@@ -29,6 +34,7 @@ def setOfWords2Vec(vocabList, inputSet):
         else: print "the word: %s is not in my Vocabulary!" % word
     return returnVec
 
+#朴素贝叶斯分类器训练函数
 def trainNB0(trainMatrix,trainCategory):
     numTrainDocs = len(trainMatrix)
     numWords = len(trainMatrix[0])
@@ -46,6 +52,7 @@ def trainNB0(trainMatrix,trainCategory):
     p0Vect = log(p0Num/p0Denom)          #change to log()
     return p0Vect,p1Vect,pAbusive
 
+#朴素贝叶斯分类函数
 def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
     p1 = sum(vec2Classify * p1Vec) + log(pClass1)    #element-wise mult
     p0 = sum(vec2Classify * p0Vec) + log(1.0 - pClass1)
@@ -53,7 +60,8 @@ def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
         return 1
     else: 
         return 0
-    
+
+#朴素贝叶斯词袋模型
 def bagOfWords2VecMN(vocabList, inputSet):
     returnVec = [0]*len(vocabList)
     for word in inputSet:
@@ -75,11 +83,13 @@ def testingNB():
     thisDoc = array(setOfWords2Vec(myVocabList, testEntry))
     print testEntry,'classified as: ',classifyNB(thisDoc,p0V,p1V,pAb)
 
+#文本解析
 def textParse(bigString):    #input is big string, #output is word list
     import re
     listOfTokens = re.split(r'\W*', bigString)
     return [tok.lower() for tok in listOfTokens if len(tok) > 2] 
-    
+
+#垃圾邮件测试
 def spamTest():
     docList=[]; classList = []; fullText =[]
     for i in range(1,26):
@@ -91,14 +101,14 @@ def spamTest():
         docList.append(wordList)
         fullText.extend(wordList)
         classList.append(0)
-    vocabList = createVocabList(docList)#create vocabulary
+    vocabList = createVocabList(docList)          #create vocabulary
     trainingSet = range(50); testSet=[]           #create test set
-    for i in range(10):
+    for i in range(10): #随机十封为测试集
         randIndex = int(random.uniform(0,len(trainingSet)))
         testSet.append(trainingSet[randIndex])
         del(trainingSet[randIndex])  
     trainMat=[]; trainClasses = []
-    for docIndex in trainingSet:#train the classifier (get probs) trainNB0
+    for docIndex in trainingSet:                  #train the classifier (get probs) trainNB0
         trainMat.append(bagOfWords2VecMN(vocabList, docList[docIndex]))
         trainClasses.append(classList[docIndex])
     p0V,p1V,pSpam = trainNB0(array(trainMat),array(trainClasses))
@@ -111,6 +121,7 @@ def spamTest():
     print 'the error rate is: ',float(errorCount)/len(testSet)
     #return vocabList,fullText
 
+#高频词去除函数
 def calcMostFreq(vocabList,fullText):
     import operator
     freqDict = {}
@@ -132,7 +143,7 @@ def localWords(feed1,feed0):
         docList.append(wordList)
         fullText.extend(wordList)
         classList.append(0)
-    vocabList = createVocabList(docList)#create vocabulary
+    vocabList = createVocabList(docList)  #create vocabulary
     top30Words = calcMostFreq(vocabList,fullText)   #remove top 30 words
     for pairW in top30Words:
         if pairW[0] in vocabList: vocabList.remove(pairW[0])
@@ -169,3 +180,18 @@ def getTopWords(ny,sf):
     print "NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**"
     for item in sortedNY:
         print item[0]
+
+if __name__ == "__main__":
+    #ListOPosts, listClasses = loadDataSet()
+    #myVocabList = createVocabList(ListOPosts)
+    #print myVocabList
+    #print listClasses
+    #trainMat = []
+    #for postinDoc in ListOPosts:
+        #trainMat.append(setOfWords2Vec(myVocabList,postinDoc))
+    #p0V, p1V, pAb = trainNB0(trainMat,listClasses)
+    #print p0V
+    #print p1V
+    #print pAb
+    #testingNB()
+    spamTest()
