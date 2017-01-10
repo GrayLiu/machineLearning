@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Nov 28, 2010
 Adaboost is short for Adaptive Boosting
@@ -27,6 +29,7 @@ def loadDataSet(fileName):      #general function to parse tab -delimited floats
         labelMat.append(float(curLine[-1]))
     return dataMat,labelMat
 
+#通过阀值比较对数据进行分类
 def stumpClassify(dataMatrix,dimen,threshVal,threshIneq):#just classify the data
     retArray = ones((shape(dataMatrix)[0],1))
     if threshIneq == 'lt':
@@ -35,23 +38,26 @@ def stumpClassify(dataMatrix,dimen,threshVal,threshIneq):#just classify the data
         retArray[dataMatrix[:,dimen] > threshVal] = -1.0
     return retArray
     
-
+#遍历stumpClassify（）函数所有的可能输入值，并找到数据集上最佳的单层决策树
 def buildStump(dataArr,classLabels,D):
     dataMatrix = mat(dataArr); labelMat = mat(classLabels).T
     m,n = shape(dataMatrix)
-    numSteps = 10.0; bestStump = {}; bestClasEst = mat(zeros((m,1)))
+    numSteps = 10.0
+    bestStump = {}
+    bestClasEst = mat(zeros((m,1)))
     minError = inf #init error sum, to +infinity
-    for i in range(n):#loop over all dimensions
+    for i in range(n):#loop over all dimensions 在数据集的所有特征上遍历
         rangeMin = dataMatrix[:,i].min(); rangeMax = dataMatrix[:,i].max();
         stepSize = (rangeMax-rangeMin)/numSteps
         for j in range(-1,int(numSteps)+1):#loop over all range in current dimension
             for inequal in ['lt', 'gt']: #go over less than and greater than
                 threshVal = (rangeMin + float(j) * stepSize)
                 predictedVals = stumpClassify(dataMatrix,i,threshVal,inequal)#call stump classify with i, j, lessThan
+                print predictedVals
                 errArr = mat(ones((m,1)))
                 errArr[predictedVals == labelMat] = 0
                 weightedError = D.T*errArr  #calc total error multiplied by D
-                #print "split: dim %d, thresh %.2f, thresh ineqal: %s, the weighted error is %.3f" % (i, threshVal, inequal, weightedError)
+                print "split: dim %d, thresh %.2f, thresh ineqal: %s, the weighted error is %.3f" % (i, threshVal, inequal, weightedError)
                 if weightedError < minError:
                     minError = weightedError
                     bestClasEst = predictedVals.copy()
@@ -68,8 +74,8 @@ def adaBoostTrainDS(dataArr,classLabels,numIt=40):
     aggClassEst = mat(zeros((m,1)))
     for i in range(numIt):
         bestStump,error,classEst = buildStump(dataArr,classLabels,D)#build Stump
-        #print "D:",D.T
-        alpha = float(0.5*log((1.0-error)/max(error,1e-16)))#calc alpha, throw in max(error,eps) to account for error=0
+        print "D:",D.T
+        alpha = float(0.5*log((1.0-error)/max(error,1e-16)))#calc alpha, throw in max(error,eps) to account for error= 确保在没有错误时不会发生除零溢出
         bestStump['alpha'] = alpha  
         weakClassArr.append(bestStump)                  #store Stump Params in Array
         #print "classEst: ",classEst.T
@@ -97,6 +103,7 @@ def adaClassify(datToClass,classifierArr):
         print aggClassEst
     return sign(aggClassEst)
 
+#ROC曲线的绘制及AUC计算函数
 def plotROC(predStrengths, classLabels):
     import matplotlib.pyplot as plt
     cur = (1.0,1.0) #cursor
@@ -123,3 +130,11 @@ def plotROC(predStrengths, classLabels):
     ax.axis([0,1,0,1])
     plt.show()
     print "the Area Under the Curve is: ",ySum*xStep
+
+if __name__ == "__main__":
+    #dataMat, classLabels = loadSimpData()
+    #D = mat (ones((5,1))/5)
+    #buildStump(dataMat, classLabels, D)
+    dataArr, labelArr = loadDataSet('horseColicTraining2.txt')
+    classifierArray, aggClassEst = adaBoostTrainDS(dataArr, labelArr, 10)
+    plotROC(aggClassEst.T, labelArr)
