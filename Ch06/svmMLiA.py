@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Nov 4, 2010
 Chapter 5 source file for Machine Learing in Action
@@ -28,21 +30,23 @@ def clipAlpha(aj,H,L):
         aj = L
     return aj
 
+#五个参数分别是 数据集，类别标签，常数C, 容错率 和退出前最大的循环次数
 def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
     dataMatrix = mat(dataMatIn); labelMat = mat(classLabels).transpose()
     b = 0; m,n = shape(dataMatrix)
     alphas = mat(zeros((m,1)))
     iter = 0
     while (iter < maxIter):
-        alphaPairsChanged = 0
+        alphaPairsChanged = 0 #用于记录alpha 是否已经进行优化
         for i in range(m):
             fXi = float(multiply(alphas,labelMat).T*(dataMatrix*dataMatrix[i,:].T)) + b
-            Ei = fXi - float(labelMat[i])#if checks if an example violates KKT conditions
+            Ei = fXi - float(labelMat[i])  #if checks if an example violates KKT conditions
             if ((labelMat[i]*Ei < -toler) and (alphas[i] < C)) or ((labelMat[i]*Ei > toler) and (alphas[i] > 0)):
                 j = selectJrand(i,m)
                 fXj = float(multiply(alphas,labelMat).T*(dataMatrix*dataMatrix[j,:].T)) + b
                 Ej = fXj - float(labelMat[j])
-                alphaIold = alphas[i].copy(); alphaJold = alphas[j].copy();
+                alphaIold = alphas[i].copy()
+                alphaJold = alphas[j].copy()
                 if (labelMat[i] != labelMat[j]):
                     L = max(0, alphas[j] - alphas[i])
                     H = min(C, C + alphas[j] - alphas[i])
@@ -95,16 +99,17 @@ class optStruct:
         self.K = mat(zeros((self.m,self.m)))
         for i in range(self.m):
             self.K[:,i] = kernelTrans(self.X, self.X[i,:], kTup)
-        
+#计算E值并返回
 def calcEk(oS, k):
     fXk = float(multiply(oS.alphas,oS.labelMat).T*oS.K[:,k] + oS.b)
     Ek = fXk - float(oS.labelMat[k])
     return Ek
-        
+
+#用于选择第二个alpha值（内循环的alpha值）
 def selectJ(i, oS, Ei):         #this is the second choice -heurstic, and calcs Ej
     maxK = -1; maxDeltaE = 0; Ej = 0
     oS.eCache[i] = [1,Ei]  #set valid #choose the alpha that gives the maximum delta E
-    validEcacheList = nonzero(oS.eCache[:,0].A)[0]
+    validEcacheList = nonzero(oS.eCache[:,0].A)[0]  #非零E值对应的alpha值
     if (len(validEcacheList)) > 1:
         for k in validEcacheList:   #loop through valid Ecache values and find the one that maximizes delta E
             if k == i: continue #don't calc for i, waste of time
@@ -118,6 +123,7 @@ def selectJ(i, oS, Ei):         #this is the second choice -heurstic, and calcs 
         Ej = calcEk(oS, j)
     return j, Ej
 
+#j计算误差值并存入缓存中
 def updateEk(oS, k):#after any alpha has changed update the new value in the cache
     Ek = calcEk(oS, k)
     oS.eCache[k] = [1,Ek]
@@ -345,3 +351,11 @@ def smoPK(dataMatIn, classLabels, C, toler, maxIter):    #full Platt SMO
         elif (alphaPairsChanged == 0): entireSet = True  
         print "iteration number: %d" % iter
     return oS.b,oS.alphas
+
+if __name__ == "__main__":
+    dataArr,labelArr = loadDataSet('testSet.txt')
+    #b, alphas = smoSimple(dataArr, labelArr,0.6, 0.001, 40)
+    #b, alphas = smoP(dataArr, labelArr, 0.6, 0.001, 40)
+    #print b
+    #testRbf()
+    testDigits(('rbf',10))
