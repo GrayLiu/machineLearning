@@ -11,6 +11,10 @@ from matplotlib.figure import Figure
 def reDraw(tolS,tolN):
     reDraw.f.clf()        # clear the figure
     reDraw.a = reDraw.f.add_subplot(111)
+    xDat = []
+    yDat = []
+    testDat = []
+    pyDat = []
     if chkBtnVar.get():
         if tolN < 2: tolN = 2
         myTree=regTrees.createTree(reDraw.rawDat, regTrees.modelLeaf,\
@@ -20,8 +24,18 @@ def reDraw(tolS,tolN):
     else:
         myTree=regTrees.createTree(reDraw.rawDat, ops=(tolS,tolN))
         yHat = regTrees.createForeCast(myTree, reDraw.testDat)
-    reDraw.a.scatter(reDraw.rawDat[:,0], reDraw.rawDat[:,1], s=5) #use scatter for data set
-    reDraw.a.plot(reDraw.testDat, yHat, linewidth=2.0) #use plot for yHat
+    for raw in reDraw.rawDat:
+        raw = array(raw)[0]
+        xDat.append(raw[0])
+        yDat.append(raw[1])
+
+    reDraw.a.scatter(xDat, yDat, s=5) #use scatter for data set
+    for test in reDraw.testDat:
+        testDat.append(test)
+    for py in yHat:
+        py = array(py)[0]
+        pyDat.append(py[0])
+    reDraw.a.plot(testDat, pyDat, linewidth=2.0) #use plot for yHat
     reDraw.canvas.show()
     
 def getInputs():
@@ -65,6 +79,7 @@ chkBtn.grid(row=3, column=0, columnspan=2)
 
 reDraw.rawDat = mat(regTrees.loadDataSet('sine.txt'))
 reDraw.testDat = arange(min(reDraw.rawDat[:,0]),max(reDraw.rawDat[:,0]),0.01)
+
 reDraw(1.0, 10)
-               
+
 root.mainloop()
