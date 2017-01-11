@@ -1,9 +1,12 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Jan 8, 2011
 
 @author: Peter
 '''
 from numpy import *
+import matplotlib.pyplot as plt
 
 def loadDataSet(fileName):      #general function to parse tab -delimited floats
     numFeat = len(open(fileName).readline().split('\t')) - 1 #get number of fields 
@@ -18,19 +21,22 @@ def loadDataSet(fileName):      #general function to parse tab -delimited floats
         labelMat.append(float(curLine[-1]))
     return dataMat,labelMat
 
+#计算最佳拟合直线
 def standRegres(xArr,yArr):
-    xMat = mat(xArr); yMat = mat(yArr).T
+    xMat = mat(xArr); yMat = mat(yArr).T  #T是转置矩阵
     xTx = xMat.T*xMat
-    if linalg.det(xTx) == 0.0:
+    if linalg.det(xTx) == 0.0: #判断行列式是否为零
         print "This matrix is singular, cannot do inverse"
         return
-    ws = xTx.I * (xMat.T*yMat)
+    ws = xTx.I * (xMat.T*yMat) #I是逆矩阵
     return ws
 
+#局部加权线性回归函数
 def lwlr(testPoint,xArr,yArr,k=1.0):
     xMat = mat(xArr); yMat = mat(yArr).T
     m = shape(xMat)[0]
-    weights = mat(eye((m)))
+    weights = mat(eye((m)))  #eye对角矩阵
+    #创建对角矩阵
     for j in range(m):                      #next 2 lines create weights matrix
         diffMat = testPoint - xMat[j,:]     #
         weights[j,j] = exp(diffMat*diffMat.T/(-2.0*k**2))
@@ -59,6 +65,7 @@ def lwlrTestPlot(xArr,yArr,k=1.0):  #same thing as lwlrTest except it sorts X fi
 def rssError(yArr,yHatArr): #yArr and yHatArr both need to be arrays
     return ((yArr-yHatArr)**2).sum()
 
+#岭回归
 def ridgeRegres(xMat,yMat,lam=0.2):
     xTx = xMat.T*xMat
     denom = xTx + eye(shape(xMat)[1])*lam
@@ -90,6 +97,7 @@ def regularize(xMat):#regularize by columns
     inMat = (inMat - inMeans)/inVar
     return inMat
 
+#向前逐步线性回归
 def stageWise(xArr,yArr,eps=0.01,numIt=100):
     xMat = mat(xArr); yMat=mat(yArr).T
     yMean = mean(yMat,0)
@@ -210,3 +218,27 @@ def crossValidation(xArr,yArr,numVal=10):
     unReg = bestWeights/varX
     print "the best model from Ridge Regression is:\n",unReg
     print "with constant term: ",-1*sum(multiply(meanX,unReg)) + mean(yMat)
+
+if __name__ == "__main__":
+    xArr, yArr = loadDataSet('ex0.txt')
+    #ws = standRegres(xArr,yArr)
+    #print ws
+    yHat = lwlrTest(xArr, xArr, yArr, 0.03)
+    abX, abY = loadDataSet('abalone.txt')
+    yHat01 = lwlrTest(abX[0:99], abX[0:99], abY[0:99], 0.1)
+    yHat1 = lwlrTest(abX[0:99], abX[0:99], abY[0:99], 1)
+    yHat10 = lwlrTest(abX[0:99], abX[0:99], abY[0:99], 10)
+
+    rssError01 = rssError(abY[0:99],yHat01.T)
+    rssError1 = rssError(abY[0:99], yHat1.T)
+    rssError10 = rssError(abY[0:99], yHat10.T)
+    '''
+    #岭回归画图
+    ridgeWeights = ridgeTest(abX, abY)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(ridgeWeights)
+    plt.show()
+    '''
+
+    stageWise(abX, abY, 0.01, 200)
