@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Feb 16, 2011
 k Means Clustering for Ch10 of Machine Learning in Action
@@ -14,9 +16,11 @@ def loadDataSet(fileName):      #general function to parse tab -delimited floats
         dataMat.append(fltLine)
     return dataMat
 
+#计算两个向量的欧式距离
 def distEclud(vecA, vecB):
     return sqrt(sum(power(vecA - vecB, 2))) #la.norm(vecA-vecB)
 
+#该函数是为给定数据集构建一个包含k个随机质心的集合
 def randCent(dataSet, k):
     n = shape(dataSet)[1]
     centroids = mat(zeros((k,n)))#create centroid mat
@@ -25,7 +29,8 @@ def randCent(dataSet, k):
         rangeJ = float(max(dataSet[:,j]) - minJ)
         centroids[:,j] = mat(minJ + rangeJ * random.rand(k,1))
     return centroids
-    
+
+#K均值聚类算法
 def kMeans(dataSet, k, distMeas=distEclud, createCent=randCent):
     m = shape(dataSet)[0]
     clusterAssment = mat(zeros((m,2)))#create mat to assign data points 
@@ -48,6 +53,7 @@ def kMeans(dataSet, k, distMeas=distEclud, createCent=randCent):
             centroids[cent,:] = mean(ptsInClust, axis=0) #assign centroid to mean 
     return centroids, clusterAssment
 
+#二分K均值聚类算法
 def biKmeans(dataSet, k, distMeas=distEclud):
     m = shape(dataSet)[0]
     clusterAssment = mat(zeros((m,2)))
@@ -106,13 +112,14 @@ def massPlaceFind(fileName):
         else: print "error fetching"
         sleep(1)
     fw.close()
-    
+#球面距离计算
 def distSLC(vecA, vecB):#Spherical Law of Cosines
     a = sin(vecA[0,1]*pi/180) * sin(vecB[0,1]*pi/180)
     b = cos(vecA[0,1]*pi/180) * cos(vecB[0,1]*pi/180) * \
                       cos(pi * (vecB[0,0]-vecA[0,0]) /180)
     return arccos(a + b)*6371.0 #pi is imported with numpy
 
+#簇绘图
 import matplotlib
 import matplotlib.pyplot as plt
 def clusterClubs(numClust=5):
@@ -137,3 +144,10 @@ def clusterClubs(numClust=5):
         ax1.scatter(ptsInCurrCluster[:,0].flatten().A[0], ptsInCurrCluster[:,1].flatten().A[0], marker=markerStyle, s=90)
     ax1.scatter(myCentroids[:,0].flatten().A[0], myCentroids[:,1].flatten().A[0], marker='+', s=300)
     plt.show()
+
+if __name__ == "__main__":
+    #datMat = mat(loadDataSet('testSet.txt'))
+    #myCentroids, clustAssing = kMeans(datMat, 4)
+    #datMat3 = mat(loadDataSet('testSet2.txt'))
+    #centList, myNewAssments = biKmeans(datMat3, 3)
+    clusterClubs(5)
