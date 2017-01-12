@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Mar 24, 2011
 Ch 11 code
@@ -5,6 +7,7 @@ Ch 11 code
 '''
 from numpy import *
 
+#用于测试的简单数据集
 def loadDataSet():
     return [[1, 3, 4], [2, 3, 5], [1, 2, 3, 5], [2, 5]]
 
@@ -17,8 +20,9 @@ def createC1(dataSet):
                 
     C1.sort()
     return map(frozenset, C1)#use frozen set so we
-                            #can use it as a key in a dict    
+                            #can use it as a key in a dict    frozenset 是指被冰冻的集合，不能修改的
 
+#三个参数，分别是数据集、候选项集列表Ck以及感兴趣项集的最小支持度minSupport
 def scanD(D, Ck, minSupport):
     ssCnt = {}
     for tid in D:
@@ -36,6 +40,7 @@ def scanD(D, Ck, minSupport):
         supportData[key] = support
     return retList, supportData
 
+#输出cK
 def aprioriGen(Lk, k): #creates Ck
     retList = []
     lenLk = len(Lk)
@@ -47,6 +52,7 @@ def aprioriGen(Lk, k): #creates Ck
                 retList.append(Lk[i] | Lk[j]) #set union
     return retList
 
+#Aprior 算法
 def apriori(dataSet, minSupport = 0.5):
     C1 = createC1(dataSet)
     D = map(set, dataSet)
@@ -72,6 +78,7 @@ def generateRules(L, supportData, minConf=0.7):  #supportData is a dict coming f
                 calcConf(freqSet, H1, supportData, bigRuleList, minConf)
     return bigRuleList         
 
+#生成候选规则集合
 def calcConf(freqSet, H, supportData, brl, minConf=0.7):
     prunedH = [] #create new list to return
     for conseq in H:
@@ -82,6 +89,7 @@ def calcConf(freqSet, H, supportData, brl, minConf=0.7):
             prunedH.append(conseq)
     return prunedH
 
+#对规则进行评估
 def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
     m = len(H[0])
     if (len(freqSet) > (m + 1)): #try further merging
@@ -151,3 +159,16 @@ def getTransList(actionIdList, billTitleList): #this will return a list of lists
             print "problem getting actionId: %d" % actionId
         voteCount += 2
     return transDict, itemMeaning
+
+if __name__ == "__main__":
+    '''
+    dataSet = loadDataSet()
+    C1 = createC1(dataSet)
+    D = map(set, dataSet)
+    L1,suppData0 = scanD(D, C1, 0.5)
+    L,suppData = apriori(dataSet, minSupport=0.5)
+    rules = generateRules(L, suppData, minConf=0.5)
+    '''
+    #print rules
+    mushDatSet = [line.split() for line in open ('mushroom.dat').readlines()]
+    L, suppData = apriori(mushDatSet, minSupport=0.3)
