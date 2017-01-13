@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Jun 14, 2011
 FP-Growth FP means frequent pattern
@@ -20,7 +22,8 @@ class treeNode:
     
     def inc(self, numOccur):
         self.count += numOccur
-        
+
+    #将树以文本形式显示
     def disp(self, ind=1):
         print '  '*ind, self.name, ' ', self.count
         for child in self.children.values():
@@ -73,7 +76,8 @@ def ascendTree(leafNode, prefixPath): #ascends from leaf node to root
     if leafNode.parent != None:
         prefixPath.append(leafNode.name)
         ascendTree(leafNode.parent, prefixPath)
-    
+
+#遍历链表直到到达结尾
 def findPrefixPath(basePat, treeNode): #treeNode comes from header table
     condPats = {}
     while treeNode != None:
@@ -97,8 +101,8 @@ def mineTree(inTree, headerTable, minSup, preFix, freqItemList):
         myCondTree, myHead = createTree(condPattBases, minSup)
         #print 'head from conditional tree: ', myHead
         if myHead != None: #3. mine cond. FP-tree
-            #print 'conditional tree for: ',newFreqSet
-            #myCondTree.disp(1)            
+            print 'conditional tree for: ',newFreqSet
+            myCondTree.disp(1)
             mineTree(myCondTree, myHead, minSup, newFreqSet, freqItemList)
 
 def loadSimpDat():
@@ -160,3 +164,25 @@ def mineTweets(tweetArr, minSup=5):
 #myFPtree.disp()
 #myFreqList = []
 #mineTree(myFPtree, myHeaderTab, minSup, set([]), myFreqList)
+
+if __name__ == "__main__":
+    '''
+    rootNode = treeNode('pyramid', 9, None)
+    rootNode.children['eye'] = treeNode('eye', 13, None)
+    rootNode.children['phoenix'] = treeNode('phoenix',3 ,None)
+    rootNode.disp()
+
+    simpDat = loadSimpDat()
+    initSet = createInitSet(simpDat)
+    myFPtree, myHeaderTab = createTree(initSet, 3)
+    myFPtree.disp()
+    freqItems = []
+    mineTree(myFPtree, myHeaderTab, 3, set([]), freqItems)
+    '''
+    parseDat = [line.split() for line in open('kosarak.dat').readlines()]
+    initSet = createInitSet(parseDat)
+    myFPtree, myHeaderTab = createTree(initSet, 10000)
+    myFreqList = []
+    mineTree(myFPtree, myHeaderTab, 10000, set([]), myFreqList)
+    print len(myFreqList)
+    print myFreqList
