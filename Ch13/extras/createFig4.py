@@ -3,9 +3,12 @@ Created on Jun 14, 2011
 
 @author: Peter
 '''
+import sys
 from numpy import *
 import matplotlib
 import matplotlib.pyplot as plt
+import sys
+sys.path.append("..")
 import pca
 
 dataMat = pca.replaceNanWithMean()

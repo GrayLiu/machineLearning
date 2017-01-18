@@ -6,6 +6,8 @@ Created on Jun 1, 2011
 from numpy import *
 import matplotlib
 import matplotlib.pyplot as plt
+import sys
+sys.path.append("..")
 import pca
 
 dataMat = pca.loadDataSet('testSet.txt')
