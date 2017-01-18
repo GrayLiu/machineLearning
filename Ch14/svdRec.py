@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-，
+#coding = utf-8
 '''
 Created on Mar 8, 2011
 
@@ -40,6 +42,7 @@ def cosSim(inA,inB):
     denom = la.norm(inA)*la.norm(inB)
     return 0.5+0.5*(num/denom)
 
+#基于物品相似度的推荐引擎
 def standEst(dataMat, user, simMeas, item):
     n = shape(dataMat)[1]
     simTotal = 0.0; ratSimTotal = 0.0
@@ -108,3 +111,9 @@ def imgCompress(numSV=3, thresh=0.8):
     reconMat = U[:,:numSV]*SigRecon*VT[:numSV,:]
     print "****reconstructed matrix using %d singular values******" % numSV
     printMat(reconMat, thresh)
+
+
+if __name__ == "__main__":
+    Data = loadExData()
+    U, Sigma, VT = linalg.svd(Data)
+    print Sigma
